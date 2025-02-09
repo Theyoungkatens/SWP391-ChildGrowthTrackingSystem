@@ -1,5 +1,6 @@
 ﻿using SWP391.ChildGrowthTracking.Repository.DTO;
-using SWP391.ChildGrowthTracking.Repository.Models;
+using SWP391.ChildGrowthTracking.Repository.DTO.UseraccountDTO;
+using SWP391.ChildGrowthTracking.Repository.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,5 +12,11 @@ namespace SWP391.ChildGrowthTracking.Repository
     {
         Task<List<Useraccount>> GetAllUsers(GetAllDTO request);
         Task<Useraccount> Authenticate(string username, string password);
+        Task<Useraccount> RegisterUser(RegisterDTO request);
+        Task<Useraccount> UpdateUserAsync(int userId, UpdateUserDTO request);
+        Task<GetAllUserDTO> GetUserById(int userId);
+        Task<bool> BanUser(int userId);
+        Task<bool> RemoveUser(int userId);
+
     }
 }

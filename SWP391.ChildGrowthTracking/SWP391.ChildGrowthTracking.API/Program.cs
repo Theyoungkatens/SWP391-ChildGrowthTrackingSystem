@@ -3,9 +3,10 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
-using SWP391.ChildGrowthTracking.Repository.Models;
+using SWP391.ChildGrowthTracking.Repository.Model;
 using SWP391.ChildGrowthTracking.Service;
 using SWP391.ChildGrowthTracking.Repository;
+using SWP391.ChildGrowthTracking.Repository.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,9 @@ builder.Services.AddCors(p => p.AddPolicy("MyCors", build =>
 
 // ?? Dependency Injection for Services
 builder.Services.AddScoped<IUseraccount, UseraccountService>();
+builder.Services.AddScoped<IBlog, BlogService>();
+builder.Services.AddScoped<IMembershipPackage, MembershipPackageService>();
+
 
 // ?? JWT Authentication Configuration
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace SWP391.ChildGrowthTracking.Repository.Models;
+namespace SWP391.ChildGrowthTracking.Repository.Model;
 
 public partial class Swp391ChildGrowthTrackingContext : DbContext
 {
@@ -47,7 +47,7 @@ public partial class Swp391ChildGrowthTrackingContext : DbContext
     {
         modelBuilder.Entity<Alert>(entity =>
         {
-            entity.HasKey(e => e.AlertId).HasName("PK__ALERT__4B8FB03A050D58BA");
+            entity.HasKey(e => e.AlertId).HasName("PK__ALERT__4B8FB03A8B746EA8");
 
             entity.ToTable("ALERT");
 
@@ -69,12 +69,12 @@ public partial class Swp391ChildGrowthTrackingContext : DbContext
 
             entity.HasOne(d => d.Child).WithMany(p => p.Alerts)
                 .HasForeignKey(d => d.ChildId)
-                .HasConstraintName("FK__ALERT__child_id__6383C8BA");
+                .HasConstraintName("FK__ALERT__child_id__5EBF139D");
         });
 
         modelBuilder.Entity<Blog>(entity =>
         {
-            entity.HasKey(e => e.BlogId).HasName("PK__BLOG__2975AA28903B2663");
+            entity.HasKey(e => e.BlogId).HasName("PK__BLOG__2975AA2811696720");
 
             entity.ToTable("BLOG");
 
@@ -106,7 +106,7 @@ public partial class Swp391ChildGrowthTrackingContext : DbContext
 
         modelBuilder.Entity<Child>(entity =>
         {
-            entity.HasKey(e => e.ChildId).HasName("PK__CHILDS__015ADC05B01A0C8E");
+            entity.HasKey(e => e.ChildId).HasName("PK__CHILDS__015ADC057930BCAB");
 
             entity.ToTable("CHILDS");
 
@@ -139,8 +139,7 @@ public partial class Swp391ChildGrowthTrackingContext : DbContext
 
             entity.HasOne(d => d.User).WithMany(p => p.Children)
                 .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__CHILDS__user_id__49C3F6B7");
+                .HasConstraintName("FK__CHILDS__user_id__619B8048");
 
             entity.HasMany(d => d.Records).WithMany(p => p.Children)
                 .UsingEntity<Dictionary<string, object>>(
@@ -155,7 +154,7 @@ public partial class Swp391ChildGrowthTrackingContext : DbContext
                         .HasConstraintName("FK_CHILDRECORD_CHILDS"),
                     j =>
                     {
-                        j.HasKey("ChildId", "RecordId").HasName("PK__CHILDREC__CAA62748F8F7C419");
+                        j.HasKey("ChildId", "RecordId").HasName("PK__CHILDREC__CAA62748938F6EA2");
                         j.ToTable("CHILDRECORD");
                         j.IndexerProperty<int>("ChildId").HasColumnName("child_id");
                         j.IndexerProperty<int>("RecordId").HasColumnName("record_id");
@@ -164,7 +163,7 @@ public partial class Swp391ChildGrowthTrackingContext : DbContext
 
         modelBuilder.Entity<ConsultationRequest>(entity =>
         {
-            entity.HasKey(e => e.RequestId).HasName("PK__CONSULTA__18D3B90F33475FF8");
+            entity.HasKey(e => e.RequestId).HasName("PK__CONSULTA__18D3B90F420C4375");
 
             entity.ToTable("CONSULTATION_REQUEST");
 
@@ -198,17 +197,16 @@ public partial class Swp391ChildGrowthTrackingContext : DbContext
 
             entity.HasOne(d => d.Child).WithMany(p => p.ConsultationRequests)
                 .HasForeignKey(d => d.ChildId)
-                .HasConstraintName("FK__CONSULTAT__child__5812160E");
+                .HasConstraintName("FK__CONSULTAT__child__628FA481");
 
             entity.HasOne(d => d.User).WithMany(p => p.ConsultationRequests)
                 .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__CONSULTAT__user___571DF1D5");
+                .HasConstraintName("FK__CONSULTAT__user___6383C8BA");
         });
 
         modelBuilder.Entity<ConsultationResponse>(entity =>
         {
-            entity.HasKey(e => e.ResponseId).HasName("PK__CONSULTA__EBECD89648B589CD");
+            entity.HasKey(e => e.ResponseId).HasName("PK__CONSULTA__EBECD8968CBA7DE5");
 
             entity.ToTable("CONSULTATION_RESPONSE");
 
@@ -233,26 +231,26 @@ public partial class Swp391ChildGrowthTrackingContext : DbContext
 
             entity.HasOne(d => d.Doctor).WithMany(p => p.ConsultationResponses)
                 .HasForeignKey(d => d.DoctorId)
-                .HasConstraintName("FK__CONSULTAT__docto__5BE2A6F2");
+                .HasConstraintName("FK__CONSULTAT__docto__6477ECF3");
 
             entity.HasOne(d => d.Request).WithMany(p => p.ConsultationResponses)
                 .HasForeignKey(d => d.RequestId)
-                .HasConstraintName("FK__CONSULTAT__reque__5AEE82B9");
+                .HasConstraintName("FK__CONSULTAT__reque__656C112C");
         });
 
         modelBuilder.Entity<Doctor>(entity =>
         {
-            entity.HasKey(e => e.DoctorId).HasName("PK__DOCTOR__F3993564B8F95C4C");
+            entity.HasKey(e => e.DoctorId).HasName("PK__DOCTOR__F39935646EB79A15");
 
             entity.ToTable("DOCTOR");
 
-            entity.HasIndex(e => e.PhoneNumber, "UQ__DOCTOR__A1936A6B9FB55ACA").IsUnique();
+            entity.HasIndex(e => e.PhoneNumber, "UQ__DOCTOR__A1936A6BAE74D6D6").IsUnique();
 
-            entity.HasIndex(e => e.Email, "UQ__DOCTOR__AB6E6164FE1B69D0").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__DOCTOR__AB6E616434AC6FFC").IsUnique();
 
-            entity.HasIndex(e => e.UserId, "UQ__DOCTOR__B9BE370EC2FC16C5").IsUnique();
+            entity.HasIndex(e => e.UserId, "UQ__DOCTOR__B9BE370E6B617718").IsUnique();
 
-            entity.HasIndex(e => e.LicenseNumber, "UQ__DOCTOR__D482A003FE68F4D8").IsUnique();
+            entity.HasIndex(e => e.LicenseNumber, "UQ__DOCTOR__D482A003C6474315").IsUnique();
 
             entity.Property(e => e.DoctorId).HasColumnName("doctor_id");
             entity.Property(e => e.Biography)
@@ -290,13 +288,12 @@ public partial class Swp391ChildGrowthTrackingContext : DbContext
 
             entity.HasOne(d => d.User).WithOne(p => p.Doctor)
                 .HasForeignKey<Doctor>(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_DOCTOR_USERACCOUNT");
         });
 
         modelBuilder.Entity<GrowthRecord>(entity =>
         {
-            entity.HasKey(e => e.RecordId).HasName("PK__GROWTH_R__BFCFB4DD55174495");
+            entity.HasKey(e => e.RecordId).HasName("PK__GROWTH_R__BFCFB4DD29A90086");
 
             entity.ToTable("GROWTH_RECORDS");
 
@@ -319,7 +316,7 @@ public partial class Swp391ChildGrowthTrackingContext : DbContext
 
         modelBuilder.Entity<MembershipPackage>(entity =>
         {
-            entity.HasKey(e => e.PackageId).HasName("PK__MEMBERSH__63846AE80A0D37CA");
+            entity.HasKey(e => e.PackageId).HasName("PK__MEMBERSH__63846AE8AA6D5DF2");
 
             entity.ToTable("MEMBERSHIP_PACKAGES");
 
@@ -347,13 +344,13 @@ public partial class Swp391ChildGrowthTrackingContext : DbContext
 
         modelBuilder.Entity<Payment>(entity =>
         {
-            entity.HasKey(e => e.PaymentId).HasName("PK__PAYMENT__ED1FC9EAAC868FCF");
+            entity.HasKey(e => e.PaymentId).HasName("PK__PAYMENT__ED1FC9EAD5389578");
 
             entity.ToTable("PAYMENT");
 
-            entity.HasIndex(e => e.TransactionId, "UQ__PAYMENT__85C600AE114849CD").IsUnique();
+            entity.HasIndex(e => e.TransactionId, "UQ__PAYMENT__85C600AE67243688").IsUnique();
 
-            entity.HasIndex(e => e.Membershipid, "UQ__PAYMENT__86AB370EC1CDB522").IsUnique();
+            entity.HasIndex(e => e.Membershipid, "UQ__PAYMENT__86AB370E37898AC5").IsUnique();
 
             entity.Property(e => e.PaymentId).HasColumnName("payment_id");
             entity.Property(e => e.Membershipid).HasColumnName("membershipid");
@@ -376,13 +373,12 @@ public partial class Swp391ChildGrowthTrackingContext : DbContext
 
             entity.HasOne(d => d.Membership).WithOne(p => p.Payment)
                 .HasForeignKey<Payment>(d => d.Membershipid)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PAYMENT_USER_MEMBERSHIP");
         });
 
         modelBuilder.Entity<RatingFeedback>(entity =>
         {
-            entity.HasKey(e => e.FeedbackId).HasName("PK__RATING_F__7A6B2B8C9A61887A");
+            entity.HasKey(e => e.FeedbackId).HasName("PK__RATING_F__7A6B2B8C902C0665");
 
             entity.ToTable("RATING_FEEDBACK");
 
@@ -404,16 +400,16 @@ public partial class Swp391ChildGrowthTrackingContext : DbContext
 
             entity.HasOne(d => d.Doctor).WithMany(p => p.RatingFeedbacks)
                 .HasForeignKey(d => d.DoctorId)
-                .HasConstraintName("FK__RATING_FE__docto__5FB337D6");
+                .HasConstraintName("FK__RATING_FE__docto__68487DD7");
 
             entity.HasOne(d => d.User).WithMany(p => p.RatingFeedbacks)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__RATING_FE__user___5EBF139D");
+                .HasConstraintName("FK__RATING_FE__user___693CA210");
         });
 
         modelBuilder.Entity<UserMembership>(entity =>
         {
-            entity.HasKey(e => e.Membershipid).HasName("PK__USER_MEM__86AB370F8E1C4F02");
+            entity.HasKey(e => e.Membershipid).HasName("PK__USER_MEM__86AB370FFEB4838B");
 
             entity.ToTable("USER_MEMBERSHIP");
 
@@ -438,24 +434,22 @@ public partial class Swp391ChildGrowthTrackingContext : DbContext
 
             entity.HasOne(d => d.Package).WithMany(p => p.UserMemberships)
                 .HasForeignKey(d => d.PackageId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__USER_MEMB__packa__45F365D3");
+                .HasConstraintName("FK__USER_MEMB__packa__6A30C649");
 
             entity.HasOne(d => d.User).WithMany(p => p.UserMemberships)
                 .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__USER_MEMB__user___44FF419A");
+                .HasConstraintName("FK__USER_MEMB__user___6B24EA82");
         });
 
         modelBuilder.Entity<Useraccount>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__USERACCO__B9BE370F30B79A68");
+            entity.HasKey(e => e.UserId).HasName("PK__USERACCO__B9BE370FE6B91909");
 
             entity.ToTable("USERACCOUNT");
 
-            entity.HasIndex(e => e.PhoneNumber, "UQ__USERACCO__A1936A6B3BECA56E").IsUnique();
+            entity.HasIndex(e => e.PhoneNumber, "UQ__USERACCO__A1936A6BF533A720").IsUnique();
 
-            entity.HasIndex(e => e.Email, "UQ__USERACCO__AB6E61647B5F9FD0").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__USERACCO__AB6E61641A2C578B").IsUnique();
 
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.Address)
@@ -474,7 +468,7 @@ public partial class Swp391ChildGrowthTrackingContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("password");
             entity.Property(e => e.PhoneNumber)
-                .HasMaxLength(20)
+                .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("phone_number");
             entity.Property(e => e.ProfilePicture)
@@ -493,7 +487,6 @@ public partial class Swp391ChildGrowthTrackingContext : DbContext
                 .HasColumnName("status");
             entity.Property(e => e.Username)
                 .HasMaxLength(255)
-                .IsUnicode(false)
                 .HasColumnName("username");
         });
 

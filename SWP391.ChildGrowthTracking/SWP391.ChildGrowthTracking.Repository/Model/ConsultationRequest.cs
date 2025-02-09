@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SWP391.ChildGrowthTracking.Repository.Models;
+namespace SWP391.ChildGrowthTracking.Repository.Model;
 
 public partial class ConsultationRequest
 {
     public int RequestId { get; set; }
 
-    public int UserId { get; set; }
+    public int? UserId { get; set; }
 
     public int? ChildId { get; set; }
 
@@ -27,5 +27,5 @@ public partial class ConsultationRequest
 
     public virtual ICollection<ConsultationResponse> ConsultationResponses { get; set; } = new List<ConsultationResponse>();
 
-    public virtual Useraccount User { get; set; } = null!;
+    public virtual Useraccount? User { get; set; }
 }

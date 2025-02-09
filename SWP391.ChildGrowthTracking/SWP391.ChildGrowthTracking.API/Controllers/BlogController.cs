@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using SWP391.ChildGrowthTracking.Service;
+using SWP391.ChildGrowthTracking.Repository.DTO.BlogDTO;
+using System;
+using System.Threading.Tasks;
+using SWP391.ChildGrowthTracking.Repository.Services;
 
 namespace SWP391.ChildGrowthTracking.API.Controllers
 {
@@ -8,36 +11,107 @@ namespace SWP391.ChildGrowthTracking.API.Controllers
     [ApiController]
     public class BlogController : ControllerBase
     {
-        // GET: api/<BlogController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        private readonly IBlog _blogService;
+
+        public BlogController(IBlog blogService)
         {
-            return new string[] { "value1", "value2" };
+            _blogService = blogService;
         }
 
-        // GET api/<BlogController>/5
+        [HttpGet("get-all")]
+        public async Task<IActionResult> GetAllBlogs()
+        {
+            try
+            {
+                var blogs = await _blogService.GetAllBlogs();
+                return Ok(new { success = true, data = blogs });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<IActionResult> GetBlogById(int id)
         {
-            return "value";
+            try
+            {
+                var blog = await _blogService.GetBlogById(id);
+                if (blog == null)
+                    return NotFound(new { success = false, message = "Blog not found." });
+
+                return Ok(new { success = true, data = blog });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = "Error retrieving blog", details = ex.Message });
+            }
         }
 
-        // POST api/<BlogController>
-        [HttpPost]
-        public void Post([FromBody] string value)
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateBlog([FromBody] BlogCreateDTO request)
         {
+            try
+            {
+                var blog = await _blogService.CreateBlog(request);
+                return Ok(new { success = true, message = "Blog created successfully.", data = blog });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
-        // PUT api/<BlogController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> UpdateBlog(int id, [FromBody] BlogCreateDTO request)
         {
+            try
+            {
+                var updatedBlog = await _blogService.UpdateBlog(id, request);
+                if (updatedBlog == null)
+                    return NotFound(new { success = false, message = "Blog not found." });
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Blog updated successfully.",
+                    data = updatedBlog
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = $"Error updating blog: {ex.Message}" });
+            }
+        }
+        [HttpPut("approve/{blogId}")]
+        public async Task<IActionResult> ApproveBlog(int blogId)
+        {
+            var result = await _blogService.ApproveBlog(blogId);
+            if (!result)
+                return NotFound(new { message = "Blog not found or already approved." });
+
+            return Ok(new { message = "Blog approved successfully." });
         }
 
-        // DELETE api/<BlogController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> DeleteBlog(int id)
         {
+            try
+            {
+                await _blogService.DeleteBlog(id);
+                return Ok(new { success = true, message = "Blog deleted successfully." });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = "Error deleting blog", details = ex.Message });
+            }
         }
+
+        
     }
 }

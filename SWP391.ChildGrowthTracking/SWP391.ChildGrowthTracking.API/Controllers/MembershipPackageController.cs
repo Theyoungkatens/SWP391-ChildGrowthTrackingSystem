@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using SWP391.ChildGrowthTracking.Repository.DTO.MembershipPackageDTO;
+using SWP391.ChildGrowthTracking.Repository.Services;
+using SWP391.ChildGrowthTracking.Repository;
 
 namespace SWP391.ChildGrowthTracking.API.Controllers
 {
@@ -8,36 +11,91 @@ namespace SWP391.ChildGrowthTracking.API.Controllers
     [ApiController]
     public class MembershipPackageController : ControllerBase
     {
-        // GET: api/<MembershipPackageController>
+        private readonly IMembershipPackage _service;
+
+        public MembershipPackageController(IMembershipPackage service)
+        {
+            _service = service;
+        }
+
+
+        /// <summary>
+        /// Get all membership packages
+        /// </summary>
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<ActionResult<IEnumerable<MembershipPackageDTO>>> GetAllPackages()
         {
-            return new string[] { "value1", "value2" };
+            var packages = await _service.GetAllPackages();
+            return Ok(packages);
         }
 
-        // GET api/<MembershipPackageController>/5
+        /// <summary>
+        /// Get a membership package by ID
+        /// </summary>
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<ActionResult<MembershipPackageDTO>> GetPackageById(int id)
         {
-            return "value";
+            var package = await _service.GetPackageById(id);
+            if (package == null) return NotFound("Membership package not found.");
+            return Ok(package);
         }
 
-        // POST api/<MembershipPackageController>
+        /// <summary>
+        /// Create a new membership package
+        /// </summary>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<ActionResult<MembershipPackageDTO>> CreatePackage([FromBody] MembershipPackageCreateDTO dto)
         {
+            if (dto == null) return BadRequest("Invalid package data.");
+            var package = await _service.CreatePackage(dto);
+            return CreatedAtAction(nameof(GetPackageById), new { id = package.PackageId }, package);
         }
 
-        // PUT api/<MembershipPackageController>/5
+        /// <summary>
+        /// Update an existing membership package
+        /// </summary>
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<ActionResult<MembershipPackageDTO>> UpdatePackage(int id, [FromBody] MembershipPackageUpdateDTO dto)
         {
+            if (dto == null) return BadRequest("Invalid update data.");
+            var updatedPackage = await _service.UpdatePackage(id, dto);
+            if (updatedPackage == null) return NotFound("Membership package not found.");
+            return Ok(updatedPackage);
         }
 
-        // DELETE api/<MembershipPackageController>/5
+        /// <summary>
+        /// Delete a membership package
+        /// </summary>
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<ActionResult> DeletePackage(int id)
         {
+            var result = await _service.DeletePackage(id);
+            if (!result) return NotFound("Membership package not found.");
+
+            return Ok(new { message = "Membership package deleted successfully." });
+        }
+
+
+        /// <summary>
+        /// Approve (Activate) a membership package
+        /// </summary>
+        [HttpPatch("{id}/approve")]
+        public async Task<ActionResult> ApprovePackage(int id)
+        {
+            var result = await _service.ApprovePackage(id);
+            if (!result) return NotFound("Membership package not found.");
+            return Ok("Package approved successfully.");
+        }
+
+        /// <summary>
+        /// Deactivate a membership package
+        /// </summary>
+        [HttpPatch("{id}/deactivate")]
+        public async Task<ActionResult> DeactivatePackage(int id)
+        {
+            var result = await _service.DeactivatePackage(id);
+            if (!result) return NotFound("Membership package not found.");
+            return Ok("Package deactivated successfully.");
         }
     }
 }
