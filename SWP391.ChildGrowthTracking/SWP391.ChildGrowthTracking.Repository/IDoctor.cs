@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SWP391.ChildGrowthTracking.Repository.DTO.DoctorDTO;
 
-namespace SWP391.ChildGrowthTracking.Repository
+namespace SWP391.ChildGrowthTracking.Repository.Interfaces
 {
-    internal interface IDoctor
+    public interface IDoctor
     {
+        Task<List<DoctorDTO>> GetAllDoctors();
+        Task<DoctorDTO?> GetDoctorById(int doctorId);
+        
+        Task<DoctorDTO> UpdateDoctor(int doctorId, DoctorCreateDTO doctorDto);
+        Task<bool> DeleteDoctor(int doctorId);
     }
 }

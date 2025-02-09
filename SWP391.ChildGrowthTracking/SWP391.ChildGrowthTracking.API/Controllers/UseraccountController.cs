@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using SWP391.ChildGrowthTracking.Repository;
 using SWP391.ChildGrowthTracking.Repository.DTO;
+using SWP391.ChildGrowthTracking.Repository.DTO.DoctorDTO;
 using SWP391.ChildGrowthTracking.Repository.DTO.UseraccountDTO;
 using SWP391.ChildGrowthTracking.Repository.Model;
 using SWP391.ChildGrowthTracking.Service;
@@ -195,7 +196,30 @@ namespace SWP391.ChildGrowthTracking.API.Controllers
                 return BadRequest(new { success = false, message = "Error removing user", details = ex.Message });
             }
         }
+        [HttpPost("create-doctor")]
+        public async Task<IActionResult> CreateDoctor([FromBody] CreateUserDoctorDTO request)
+        {
+            try
+            {
+                if (request == null)
+                {
+                    return BadRequest(new { success = false, message = "Invalid request data." });
+                }
 
+                var doctorUser = await _userAccountService.CreateDoctorAsync(request);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Doctor created successfully.",
+                    data = doctorUser
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = $"Error creating doctor: {ex.Message}" });
+            }
+        }
 
         public sealed record LoginRequest(string UserName, string Password);
     }

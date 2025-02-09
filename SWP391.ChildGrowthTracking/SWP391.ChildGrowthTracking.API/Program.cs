@@ -7,12 +7,16 @@ using SWP391.ChildGrowthTracking.Repository.Model;
 using SWP391.ChildGrowthTracking.Service;
 using SWP391.ChildGrowthTracking.Repository;
 using SWP391.ChildGrowthTracking.Repository.Services;
+using SWP391.ChildGrowthTracking.Repository.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ?? Add controllers (Fixes missing controller issue)
-builder.Services.AddControllers();
-
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+        options.JsonSerializerOptions.MaxDepth = 64; // Optional: Increase the max depth if needed
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -30,7 +34,7 @@ builder.Services.AddCors(p => p.AddPolicy("MyCors", build =>
 builder.Services.AddScoped<IUseraccount, UseraccountService>();
 builder.Services.AddScoped<IBlog, BlogService>();
 builder.Services.AddScoped<IMembershipPackage, MembershipPackageService>();
-
+builder.Services.AddScoped<IDoctor, DoctorService>();
 
 // ?? JWT Authentication Configuration
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

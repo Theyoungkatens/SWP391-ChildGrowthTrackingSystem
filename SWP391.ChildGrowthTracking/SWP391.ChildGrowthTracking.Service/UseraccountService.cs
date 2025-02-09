@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using SWP391.ChildGrowthTracking.Repository;
 using SWP391.ChildGrowthTracking.Repository.DTO;
+using SWP391.ChildGrowthTracking.Repository.DTO.DoctorDTO;
 using SWP391.ChildGrowthTracking.Repository.DTO.UseraccountDTO;
 using SWP391.ChildGrowthTracking.Repository.Model;
 using System;
@@ -244,6 +245,79 @@ namespace SWP391.ChildGrowthTracking.Service
             await context.SaveChangesAsync();
             return true;
         }
+        public async Task<CreateUserDoctorDTO> CreateDoctorAsync(CreateUserDoctorDTO request)
+        {
+            using var transaction = await this.context.Database.BeginTransactionAsync();
+            try
+            {
+                if (request == null)
+                {
+                    throw new Exception("Request data is missing.");
+                }
+
+                // Kiểm tra email đã tồn tại chưa
+                if (await this.context.Useraccounts.AnyAsync(u => u.Email == request.Email))
+                {
+                    throw new Exception("Email already exists!");
+                }
+
+                // Tạo tài khoản User cho bác sĩ
+                var doctorUser = new Useraccount
+                {
+                    Username = request.Username,
+                    Password = BCrypt.Net.BCrypt.HashPassword(request.Password),
+                    Email = request.Email,
+                    PhoneNumber = request.PhoneNumber,
+                    Address = request.Address,
+                    RegistrationDate = DateTime.UtcNow,
+                    Role = 3, // Role 3 là Doctor
+                    Status = "Active"
+                };
+
+                await this.context.Useraccounts.AddAsync(doctorUser);
+                await this.context.SaveChangesAsync();
+
+                // Tạo hồ sơ bác sĩ
+                var doctor = new Doctor
+                {
+                    UserId = doctorUser.UserId,
+                    Name = request.Fullname,
+                    Specialization = request.Specialization,
+                    Email = doctorUser.Email,
+                    PhoneNumber = doctorUser.PhoneNumber,
+                    Degree = request.Degree,
+                    Hospital = request.Hospital,
+                    LicenseNumber = request.LicenseNumber,
+                    Biography = request.Biography
+                };
+
+                await this.context.Doctors.AddAsync(doctor);
+                await this.context.SaveChangesAsync();
+
+                await transaction.CommitAsync(); // Commit transaction nếu không có lỗi
+
+                // Return the CreateUserDoctorDTO after successful creation
+                return new CreateUserDoctorDTO
+                {
+                    Username = doctorUser.Username,
+                    Email = doctorUser.Email,
+                    PhoneNumber = doctorUser.PhoneNumber,
+                    Address = doctorUser.Address,
+                    Fullname = doctor.Name,
+                    Specialization = doctor.Specialization,
+                    Degree = doctor.Degree,
+                    Hospital = doctor.Hospital,
+                    LicenseNumber = doctor.LicenseNumber,
+                    Biography = doctor.Biography
+                };
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync(); // Rollback nếu có lỗi
+                throw new Exception($"Error creating doctor: {ex.Message}");
+            }
+        }
+
 
 
 
