@@ -31,7 +31,6 @@
     <Folder Include="DTO\MembershipPackageDTO\" />
     <Folder Include="DTO\ChildDTO\" />
     <Folder Include="DTO\UserMembershipDTO\" />
-    <Folder Include="DTO\UseraccountDTO\" />
     <Folder Include="DTO\RatingFeedbackDTO\" />
     <Folder Include="DTO\PaymentDTO\" />
   </ItemGroup>

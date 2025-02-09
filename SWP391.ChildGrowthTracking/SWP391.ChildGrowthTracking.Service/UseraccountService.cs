@@ -107,7 +107,10 @@ namespace SWP391.ChildGrowthTracking.Service
                 throw new Exception($"{ex.Message}");
             }
         }
-
+        public async Task<Useraccount> Authenticate(string username, string password)
+        {
+            return await context.Useraccounts.FirstOrDefaultAsync(u => u.Username == username && u.Password == password);
+        }
 
     }
 }

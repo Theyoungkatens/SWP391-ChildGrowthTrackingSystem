@@ -1,21 +1,38 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using SWP391.ChildGrowthTracking.Repository;
 using SWP391.ChildGrowthTracking.Repository.DTO;
-using System.Collections.Generic;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using SWP391.ChildGrowthTracking.Repository.Models;
+using SWP391.ChildGrowthTracking.Service;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace SWP391.ChildGrowthTracking.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UseraccountController : ControllerBase
+    public class UserAccountController : ControllerBase
     {
-        private readonly IUseraccount useraccount;
+        private readonly IConfiguration _config;
+        private readonly IUseraccount _userAccountService;
 
-        public UseraccountController(IUseraccount useraccount)
+        public UserAccountController(IConfiguration config, IUseraccount userAccountService)
         {
-            this.useraccount = useraccount;
+            _config = config;
+            _userAccountService = userAccountService;
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        {
+            var user = await _userAccountService.Authenticate(request.UserName, request.Password);
+            if (user == null)
+                return Unauthorized();
+
+            var token = GenerateJSONWebToken(user);
+            return Ok(new { success = true, token });
         }
 
         [HttpGet("get-all")]
@@ -23,7 +40,7 @@ namespace SWP391.ChildGrowthTracking.API.Controllers
         {
             try
             {
-                var users = await this.useraccount.GetAllUsers(request);
+                var users = await _userAccountService.GetAllUsers(request);
                 return Ok(new { success = true, data = users });
             }
             catch (Exception ex)
@@ -32,22 +49,24 @@ namespace SWP391.ChildGrowthTracking.API.Controllers
             }
         }
 
-            // POST api/<UseraccountController>
-            [HttpPost]
-        public void Post([FromBody] string value)
+        private string GenerateJSONWebToken(Useraccount userAccount)
         {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(_config["Jwt:Issuer"],
+                _config["Jwt:Audience"],
+                new Claim[]
+                {
+                    new(ClaimTypes.Name, userAccount.Username),
+                    new(ClaimTypes.Role, userAccount.Status),
+                },
+                expires: DateTime.Now.AddMinutes(120),
+                signingCredentials: credentials);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        // PUT api/<UseraccountController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<UseraccountController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
+        public sealed record LoginRequest(string UserName, string Password);
     }
 }

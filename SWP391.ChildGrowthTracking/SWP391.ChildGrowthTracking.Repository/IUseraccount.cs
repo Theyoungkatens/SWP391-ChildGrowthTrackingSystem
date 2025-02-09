@@ -10,5 +10,6 @@ namespace SWP391.ChildGrowthTracking.Repository
     public interface IUseraccount
     {
         Task<List<Useraccount>> GetAllUsers(GetAllDTO request);
+        Task<Useraccount> Authenticate(string username, string password);
     }
 }
