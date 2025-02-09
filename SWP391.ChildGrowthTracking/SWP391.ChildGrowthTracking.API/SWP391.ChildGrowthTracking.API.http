@@ -1,0 +1,6 @@
+@SWP391.ChildGrowthTracking.API_HostAddress = http://localhost:5200
+
+GET {{SWP391.ChildGrowthTracking.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
