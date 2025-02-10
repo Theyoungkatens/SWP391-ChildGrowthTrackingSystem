@@ -107,87 +107,87 @@ namespace SWP391.ChildGrowthTracking.Service
             return user;
         }
 
-        public async Task<Useraccount> RegisterUser(RegisterDTO request)
+        public async Task<GetAllUserDTO> RegisterUser(RegisterDTO request)
         {
-            try
+            if (request == null) throw new ArgumentNullException(nameof(request), "Invalid registration data.");
+
+            // Kiểm tra email hợp lệ trước khi chuẩn hóa
+            if (!IsValidEmail(request.Email))
+                throw new ArgumentException("Invalid email format.");
+
+            // Chuẩn hóa đầu vào
+            string normalizedEmail = request.Email.Trim().ToLower();
+            string username = request.Username?.Trim() ?? throw new ArgumentException("Username is required.");
+            string? phoneNumber = request.PhoneNumber?.Trim();
+            string? address = request.Address?.Trim();
+
+            // Kiểm tra email đã tồn tại
+            bool emailExists = await context.Useraccounts.AnyAsync(u => u.Email == normalizedEmail);
+            if (emailExists)
+                throw new ArgumentException("Email has already been registered!");
+
+            // Mã hóa mật khẩu
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
+
+            // Tạo user mới
+            var user = new Useraccount
             {
-                if (request == null)
-                    throw new ArgumentException("Invalid registration data.");
+                Email = normalizedEmail,
+                Username = username,
+                PhoneNumber = phoneNumber,
+                Address = address,
+                Password = hashedPassword,
+                Role = 2, // Mặc định Role = 2
+                RegistrationDate = DateTime.UtcNow,
+                Status = "Active"
+            };
 
-                request.Email = request.Email.Trim().ToLower(); // Chuẩn hóa email
-                request.Username = request.Username?.Trim();
-                request.PhoneNumber = request.PhoneNumber?.Trim();
-                request.Address = request.Address?.Trim();
+            // Lưu vào database
+            await context.Useraccounts.AddAsync(user);
+            await context.SaveChangesAsync();
 
-                // Kiểm tra email hợp lệ
-                var emailRegex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
-                if (!emailRegex.IsMatch(request.Email))
-                    throw new ArgumentException("Invalid email format.");
-
-                // Kiểm tra email đã tồn tại chưa
-                bool emailExists = await context.Useraccounts.AnyAsync(u => u.Email.ToLower() == request.Email);
-                if (emailExists)
-                    throw new ArgumentException("Email has already been registered!");
-
-                // Kiểm tra Username (Không để trống)
-                if (string.IsNullOrWhiteSpace(request.Username))
-                    throw new ArgumentException("Username is required.");
-
-                // Mã hóa mật khẩu
-                var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
-
-                // Tạo user mới
-                var user = new Useraccount
-                {
-                    Email = request.Email,
-                    Username = request.Username,
-                    PhoneNumber = request.PhoneNumber,
-                    Address = request.Address,
-                    Password = hashedPassword,
-                    Role = 2, // Mặc định Role = 2
-                    RegistrationDate = DateTime.UtcNow,
-                    Status = "Active"
-                };
-
-                // Lưu vào database
-                await context.Useraccounts.AddAsync(user);
-                await context.SaveChangesAsync();
-
-                return user;
-            }
-            catch (ArgumentException ex)
-            {
-                throw new ArgumentException($"Validation Error: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error during registration: {ex.Message}", ex);
-            }
+            // Lấy thông tin người dùng vừa tạo bằng GetUserById()
+            return await GetUserById(user.UserId);
         }
 
-        public async Task<Useraccount> UpdateUserAsync(int userId, UpdateUserDTO request)
+
+        // Kiểm tra định dạng email
+        private static bool IsValidEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email)) return false;
+            var emailRegex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled);
+            return emailRegex.IsMatch(email);
+        }
+
+        public async Task<GetAllUserDTO> UpdateUserAsync(int userId, UpdateUserDTO request)
         {
             try
             {
                 var user = await context.Useraccounts.FindAsync(userId);
                 if (user == null)
-                {
-                    throw new Exception("User not found.");
-                }
+                    throw new KeyNotFoundException("User not found.");
 
-                user.Username = request.Username ?? user.Username;
-                user.PhoneNumber = request.PhoneNumber ?? user.PhoneNumber;
-                user.ProfilePicture = request.ProfilePicture ?? user.ProfilePicture;
-                user.Address = request.Address ?? user.Address;
-                
+                // Cập nhật thông tin nếu request có giá trị mới
+                user.Username = !string.IsNullOrWhiteSpace(request.Username) ? request.Username.Trim() : user.Username;
+                user.PhoneNumber = !string.IsNullOrWhiteSpace(request.PhoneNumber) ? request.PhoneNumber.Trim() : user.PhoneNumber;
+                user.ProfilePicture = !string.IsNullOrWhiteSpace(request.ProfilePicture) ? request.ProfilePicture.Trim() : user.ProfilePicture;
+                user.Address = !string.IsNullOrWhiteSpace(request.Address) ? request.Address.Trim() : user.Address;
+
                 await context.SaveChangesAsync();
-                return user;
+
+                // Trả về thông tin sau khi cập nhật
+                return await GetUserById(user.UserId);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                throw new KeyNotFoundException($"Error: {ex.Message}");
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error updating user: {ex.Message}");
+                throw new Exception($"Error updating user: {ex.Message}", ex);
             }
         }
+
         public async Task<GetAllUserDTO> GetUserById(int userId)
         {
             try
@@ -265,7 +265,7 @@ namespace SWP391.ChildGrowthTracking.Service
                 var doctorUser = new Useraccount
                 {
                     Username = request.Username,
-                    Password = BCrypt.Net.BCrypt.HashPassword(request.Password),
+                    Password = request.Password,
                     Email = request.Email,
                     PhoneNumber = request.PhoneNumber,
                     Address = request.Address,
