@@ -35,7 +35,7 @@ builder.Services.AddScoped<IUseraccount, UseraccountService>();
 builder.Services.AddScoped<IBlog, BlogService>();
 builder.Services.AddScoped<IMembershipPackage, MembershipPackageService>();
 builder.Services.AddScoped<IDoctor, DoctorService>();
-
+builder.Services.AddScoped<IUserMembership, UserMembershipService>();
 // ?? JWT Authentication Configuration
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

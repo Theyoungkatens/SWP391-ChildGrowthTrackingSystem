@@ -67,25 +67,18 @@ namespace SWP391.ChildGrowthTracking.Repository.Services
             if (existingDoctor == null)
                 throw new Exception("Doctor not found.");
 
-            // Check if the email already exists (excluding the current doctor)
-            bool isEmailExist = await _context.Doctors
-                .AnyAsync(d => d.Email.ToLower() == doctorDto.Email.ToLower() && d.DoctorId != doctorId);
-
-            if (isEmailExist)
-            {
-                throw new Exception("A doctor with the same email already exists.");
-            }
+            
 
             // Update doctor information
             existingDoctor.Name = doctorDto.Name;
             existingDoctor.Specialization = doctorDto.Specialization;
-            existingDoctor.Email = doctorDto.Email;
+           
             existingDoctor.PhoneNumber = doctorDto.PhoneNumber;
             existingDoctor.Degree = doctorDto.Degree;
             existingDoctor.Hospital = doctorDto.Hospital;
             existingDoctor.LicenseNumber = doctorDto.LicenseNumber;
             existingDoctor.Biography = doctorDto.Biography;
-            existingDoctor.UserId = doctorDto.UserId;
+            
 
             _context.Doctors.Update(existingDoctor);
             await _context.SaveChangesAsync();

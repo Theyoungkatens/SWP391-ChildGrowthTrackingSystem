@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using SWP391.ChildGrowthTracking.Repository;
+using SWP391.ChildGrowthTracking.Repository.DTO.UserMembershipDTO;
+using SWP391.ChildGrowthTracking.Repository.Services;
+using System;
+using System.Threading.Tasks;
 
 namespace SWP391.ChildGrowthTracking.API.Controllers
 {
@@ -8,36 +11,95 @@ namespace SWP391.ChildGrowthTracking.API.Controllers
     [ApiController]
     public class UserMembershipController : ControllerBase
     {
-        // GET: api/<UserMembershipController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        private readonly IUserMembership _userMembershipService;
+
+        public UserMembershipController(IUserMembership userMembershipService)
         {
-            return new string[] { "value1", "value2" };
+            _userMembershipService = userMembershipService;
         }
 
-        // GET api/<UserMembershipController>/5
+        [HttpGet("get-all")]
+        public async Task<IActionResult> GetAllUserMemberships()
+        {
+            try
+            {
+                var memberships = await _userMembershipService.GetAllUserMemberships();
+                return Ok(new { success = true, data = memberships });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<IActionResult> GetUserMembershipById(int id)
         {
-            return "value";
+            try
+            {
+                var membership = await _userMembershipService.GetUserMembershipById(id);
+                if (membership == null)
+                    return NotFound(new { success = false, message = "Membership not found." });
+
+                return Ok(new { success = true, data = membership });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = "Error retrieving membership", details = ex.Message });
+            }
         }
 
-        // POST api/<UserMembershipController>
-        [HttpPost]
-        public void Post([FromBody] string value)
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateUserMembership([FromBody] CreateUserMembershipDTO request)
         {
+            try
+            {
+                var membership = await _userMembershipService.CreateUserMembership(request);
+                return Ok(new { success = true, message = "Membership created successfully.", data = membership });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
-        // PUT api/<UserMembershipController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> UpdateUserMembership(int id, [FromBody] UpdateUserMembershipDTO request)
         {
+            try
+            {
+                var updatedMembership = await _userMembershipService.UpdateUserMembership(id, request);
+                if (updatedMembership == null)
+                    return NotFound(new { success = false, message = "Membership not found." });
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Membership updated successfully.",
+                    data = updatedMembership
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = $"Error updating membership: {ex.Message}" });
+            }
         }
 
-        // DELETE api/<UserMembershipController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> DeleteUserMembership(int id)
         {
+            try
+            {
+                var deleted = await _userMembershipService.DeleteUserMembership(id);
+                if (!deleted)
+                    return NotFound(new { success = false, message = "Membership not found." });
+
+                return Ok(new { success = true, message = "Membership deleted successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = "Error deleting membership", details = ex.Message });
+            }
         }
     }
 }

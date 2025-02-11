@@ -28,7 +28,6 @@
     <Folder Include="DTO\ConsultationResponseDTO\" />
     <Folder Include="DTO\GrowthRecordDTO\" />
     <Folder Include="DTO\ChildDTO\" />
-    <Folder Include="DTO\UserMembershipDTO\" />
     <Folder Include="DTO\RatingFeedbackDTO\" />
     <Folder Include="DTO\PaymentDTO\" />
   </ItemGroup>
