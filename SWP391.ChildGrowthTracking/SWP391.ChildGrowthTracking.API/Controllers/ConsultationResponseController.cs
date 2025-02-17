@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using SWP391.ChildGrowthTracking.Repository;
+using SWP391.ChildGrowthTracking.Repository.DTO.ConsultationResponseDTO;
+using System;
+using System.Threading.Tasks;
 
 namespace SWP391.ChildGrowthTracking.API.Controllers
 {
@@ -8,36 +10,113 @@ namespace SWP391.ChildGrowthTracking.API.Controllers
     [ApiController]
     public class ConsultationResponseController : ControllerBase
     {
-        // GET: api/<ConsultationResponseController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        private readonly IConsultationResponse _consultationResponseService;
+
+        public ConsultationResponseController(IConsultationResponse consultationResponseService)
         {
-            return new string[] { "value1", "value2" };
+            _consultationResponseService = consultationResponseService;
         }
 
-        // GET api/<ConsultationResponseController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        // Get all consultation responses
+        [HttpGet("get-all")]
+        public async Task<IActionResult> GetAllConsultationResponses()
         {
-            return "value";
+            try
+            {
+                var responses = await _consultationResponseService.GetAllConsultationResponses();
+                return Ok(new { success = true, data = responses });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
-        // POST api/<ConsultationResponseController>
-        [HttpPost]
-        public void Post([FromBody] string value)
+        // Get a consultation response by ID
+        [HttpGet("{responseId}")]
+        public async Task<IActionResult> GetConsultationResponseById(int responseId)
         {
+            try
+            {
+                var response = await _consultationResponseService.GetConsultationResponseById(responseId);
+                if (response == null)
+                {
+                    return NotFound(new { success = false, message = "Consultation response not found." });
+                }
+                return Ok(new { success = true, data = response });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = "Error retrieving response", details = ex.Message });
+            }
         }
 
-        // PUT api/<ConsultationResponseController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        // Create a new consultation response
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateConsultationResponse([FromBody] CreateConsultationResponseDTO request)
         {
+            try
+            {
+                var response = await _consultationResponseService.CreateConsultationResponse(request);
+                return Ok(new { success = true, message = "Consultation response created successfully.", data = response });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
-        // DELETE api/<ConsultationResponseController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        // Update an existing consultation response
+        [HttpPut("update/{responseId}")]
+        public async Task<IActionResult> UpdateConsultationResponse(int responseId, [FromBody] UpdateConsultationResponseDTO request)
         {
+            try
+            {
+                var updatedResponse = await _consultationResponseService.UpdateConsultationResponse(responseId, request);
+                if (updatedResponse == null)
+                {
+                    return NotFound(new { success = false, message = "Consultation response not found." });
+                }
+                return Ok(new { success = true, message = "Consultation response updated successfully.", data = updatedResponse });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = "Error updating response", details = ex.Message });
+            }
+        }
+
+        // Delete a consultation response
+        [HttpDelete("delete/{responseId}")]
+        public async Task<IActionResult> DeleteConsultationResponse(int responseId)
+        {
+            try
+            {
+                var deleted = await _consultationResponseService.DeleteConsultationResponse(responseId);
+                if (!deleted)
+                {
+                    return NotFound(new { success = false, message = "Consultation response not found." });
+                }
+                return Ok(new { success = true, message = "Consultation response deleted successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = "Error deleting response", details = ex.Message });
+            }
+        }
+
+        // Count the total number of consultation responses
+        [HttpGet("count")]
+        public async Task<IActionResult> CountConsultationResponses()
+        {
+            try
+            {
+                var count = await _consultationResponseService.CountConsultationResponses();
+                return Ok(new { success = true, data = count });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = "Error counting responses", details = ex.Message });
+            }
         }
     }
 }

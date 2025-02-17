@@ -26,4 +26,5 @@ public partial class GrowthRecord
     public int? Old { get; set; }
 
     public virtual ICollection<Child> Children { get; set; } = new List<Child>();
+    
 }

@@ -51,11 +51,26 @@ namespace SWP391.ChildGrowthTracking.Repository.Services
 
         public async Task<UserMembershipGetDTO> CreateUserMembership(CreateUserMembershipDTO dto)
         {
-            // Lấy thông tin gói membership để xác định DurationMonths
+            // Lấy thông tin gói membership
             var package = await _context.MembershipPackages.FindAsync(dto.PackageId);
             if (package == null)
             {
                 throw new Exception("Membership package not found.");
+            }
+
+            // Kiểm tra trạng thái của gói membership
+            if (package.Status != "Active")
+            {
+                throw new Exception("The selected membership package is not active.");
+            }
+
+            // Kiểm tra user đã có gói membership này chưa
+            var existingMembership = await _context.UserMemberships
+                .FirstOrDefaultAsync(m => m.UserId == dto.UserId && m.PackageId == dto.PackageId);
+
+            if (existingMembership != null)
+            {
+                throw new Exception("User already has an active membership for this package.");
             }
 
             // Ngày bắt đầu là hôm nay
@@ -78,6 +93,7 @@ namespace SWP391.ChildGrowthTracking.Repository.Services
             return await GetUserMembershipById(newUserMembership.Membershipid)
                 ?? throw new Exception("Error retrieving the newly created membership.");
         }
+
 
 
         public async Task<UserMembershipGetDTO?> UpdateUserMembership(int membershipId, UpdateUserMembershipDTO dto)

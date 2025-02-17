@@ -1,6 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using SWP391.ChildGrowthTracking.Repository;
+using SWP391.ChildGrowthTracking.Repository.DTO;
+using SWP391.ChildGrowthTracking.Repository.DTO.ChildDTO;
+using SWP391.ChildGrowthTracking.Repository.Services;
+using System;
+using System.Threading.Tasks;
 
 namespace SWP391.ChildGrowthTracking.API.Controllers
 {
@@ -8,36 +12,109 @@ namespace SWP391.ChildGrowthTracking.API.Controllers
     [ApiController]
     public class ChildController : ControllerBase
     {
-        // GET: api/<ChildController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        private readonly IChild _childService;
+
+        public ChildController(IChild childService)
         {
-            return new string[] { "value1", "value2" };
+            _childService = childService;
         }
 
-        // GET api/<ChildController>/5
+        [HttpGet("get-all")]
+        public async Task<IActionResult> GetAllChildren()
+        {
+            try
+            {
+                var children = await _childService.GetAllChild();
+                return Ok(new { success = true, data = children });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<IActionResult> GetChildById(int id)
         {
-            return "value";
+            try
+            {
+                var child = await _childService.GetChildById(id);
+                if (child == null)
+                    return NotFound(new { success = false, message = "Child not found." });
+
+                return Ok(new { success = true, data = child });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = "Error retrieving child", details = ex.Message });
+            }
         }
 
-        // POST api/<ChildController>
-        [HttpPost]
-        public void Post([FromBody] string value)
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateChild([FromBody] CreateChildDTO request)
         {
+            try
+            {
+                var child = await _childService.CreateChild(request);
+                return Ok(new { success = true, message = "Child created successfully.", data = child });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
 
-        // PUT api/<ChildController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> UpdateChild(int id, [FromBody] UpdateChildDTO request)
         {
+            try
+            {
+                var updatedChild = await _childService.UpdateChild(id, request);
+                if (updatedChild == null)
+                    return NotFound(new { success = false, message = "Child not found." });
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Child updated successfully.",
+                    data = updatedChild
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = $"Error updating child: {ex.Message}" });
+            }
         }
 
-        // DELETE api/<ChildController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> DeleteChild(int id)
         {
+            try
+            {
+                var deleted = await _childService.DeleteChild(id);
+                if (!deleted)
+                    return NotFound(new { success = false, message = "Child not found." });
+
+                return Ok(new { success = true, message = "Child deleted successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = "Error deleting child", details = ex.Message });
+            }
+        }
+        [HttpGet("count")]
+        public async Task<IActionResult> GetChildCount()
+        {
+            try
+            {
+                var childCount = await _childService.GetChildCount();
+                return Ok(new { Count = childCount });
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions and return an appropriate error response
+                return StatusCode(500, new { Message = "An error occurred while fetching child count.", Details = ex.Message });
+            }
         }
     }
 }

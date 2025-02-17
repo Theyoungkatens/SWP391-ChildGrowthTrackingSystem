@@ -24,10 +24,7 @@
 
   <ItemGroup>
     <Folder Include="DTO\AlertDTO\" />
-    <Folder Include="DTO\ConsultationRequestDTO\" />
-    <Folder Include="DTO\ConsultationResponseDTO\" />
     <Folder Include="DTO\GrowthRecordDTO\" />
-    <Folder Include="DTO\ChildDTO\" />
     <Folder Include="DTO\RatingFeedbackDTO\" />
     <Folder Include="DTO\PaymentDTO\" />
   </ItemGroup>
