@@ -39,6 +39,7 @@ builder.Services.AddScoped<IUserMembership, UserMembershipService>();
 builder.Services.AddScoped<IChild, ChildService>();
 builder.Services.AddScoped<IConsultationRequest, ConsultationRequestService>();
 builder.Services.AddScoped<IConsultationResponse, ConsultationResponseService>();
+builder.Services.AddScoped<IRatingFeedback, RatingFeedbackService>();
 // ?? JWT Authentication Configuration
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using SWP391.ChildGrowthTracking.Repository;
+using SWP391.ChildGrowthTracking.Repository.DTO.RatingFeedbackDTO;
+using SWP391.ChildGrowthTracking.Repository.Services;
+using System.Threading.Tasks;
 
 namespace SWP391.ChildGrowthTracking.API.Controllers
 {
@@ -8,36 +10,73 @@ namespace SWP391.ChildGrowthTracking.API.Controllers
     [ApiController]
     public class RatingFeedbackController : ControllerBase
     {
-        // GET: api/<RatingFeedbackController>
+        private readonly IRatingFeedback _ratingFeedbackService;
+
+        public RatingFeedbackController(IRatingFeedback ratingFeedbackService)
+        {
+            _ratingFeedbackService = ratingFeedbackService;
+        }
+
+        // GET: api/ratingfeedback
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<IActionResult> GetAllRatingFeedbacks()
         {
-            return new string[] { "value1", "value2" };
+            var feedbacks = await _ratingFeedbackService.GetAllRatingFeedbacks();
+            return Ok(feedbacks);
         }
 
-        // GET api/<RatingFeedbackController>/5
+        // GET: api/ratingfeedback/{id}
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<IActionResult> GetRatingFeedbackById(int id)
         {
-            return "value";
+            var feedback = await _ratingFeedbackService.GetRatingFeedbackById(id);
+            if (feedback == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(feedback);
         }
 
-        // POST api/<RatingFeedbackController>
+        // POST: api/ratingfeedback
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<IActionResult> CreateRatingFeedback([FromBody] CreateRatingFeedbackDTO dto)
         {
+            try
+            {
+                var createdFeedback = await _ratingFeedbackService.CreateRatingFeedback(dto);
+                return CreatedAtAction(nameof(GetRatingFeedbackById), new { id = createdFeedback.FeedbackId }, createdFeedback);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-        // PUT api/<RatingFeedbackController>/5
+        // PUT: api/ratingfeedback/{id}
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<IActionResult> UpdateRatingFeedback(int id, [FromBody] UpdateRatingFeedbackDTO dto)
         {
+            var updatedFeedback = await _ratingFeedbackService.UpdateRatingFeedback(id, dto);
+            if (updatedFeedback == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(updatedFeedback);
         }
 
-        // DELETE api/<RatingFeedbackController>/5
+        // DELETE: api/ratingfeedback/{id}
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<IActionResult> DeleteRatingFeedback(int id)
         {
+            var result = await _ratingFeedbackService.DeleteRatingFeedback(id);
+            if (!result)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
         }
     }
 }
