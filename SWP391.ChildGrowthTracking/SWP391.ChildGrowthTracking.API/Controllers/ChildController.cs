@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SWP391.ChildGrowthTracking.Repository;
-using SWP391.ChildGrowthTracking.Repository.DTO;
 using SWP391.ChildGrowthTracking.Repository.DTO.ChildDTO;
-using SWP391.ChildGrowthTracking.Repository.Services;
 using System;
 using System.Threading.Tasks;
 
@@ -46,7 +44,7 @@ namespace SWP391.ChildGrowthTracking.API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { success = false, message = "Error retrieving child", details = ex.Message });
+                return BadRequest(new { success = false, message = ex.Message });
             }
         }
 
@@ -73,16 +71,11 @@ namespace SWP391.ChildGrowthTracking.API.Controllers
                 if (updatedChild == null)
                     return NotFound(new { success = false, message = "Child not found." });
 
-                return Ok(new
-                {
-                    success = true,
-                    message = "Child updated successfully.",
-                    data = updatedChild
-                });
+                return Ok(new { success = true, message = "Child updated successfully.", data = updatedChild });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { success = false, message = $"Error updating child: {ex.Message}" });
+                return BadRequest(new { success = false, message = ex.Message });
             }
         }
 
@@ -99,21 +92,108 @@ namespace SWP391.ChildGrowthTracking.API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { success = false, message = "Error deleting child", details = ex.Message });
+                return BadRequest(new { success = false, message = ex.Message });
             }
         }
+
         [HttpGet("count")]
         public async Task<IActionResult> GetChildCount()
         {
             try
             {
                 var childCount = await _childService.GetChildCount();
-                return Ok(new { Count = childCount });
+                return Ok(new { success = true, count = childCount });
             }
             catch (Exception ex)
             {
-                // Handle any exceptions and return an appropriate error response
-                return StatusCode(500, new { Message = "An error occurred while fetching child count.", Details = ex.Message });
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet("is-parent/{userId}/{childId}")]
+        public async Task<IActionResult> IsParent(int userId, int childId)
+        {
+            try
+            {
+                var isParent = await _childService.IsParent(userId, childId);
+                return Ok(new { success = true, isParent });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet("by-user/{userId}")]
+        public async Task<IActionResult> GetChildrenByUserId(int userId)
+        {
+            try
+            {
+                var children = await _childService.GetChildrenByUserId(userId);
+                return Ok(new { success = true, data = children });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet("by-gender/{gender}")]
+        public async Task<IActionResult> GetChildrenByGender(string gender)
+        {
+            try
+            {
+                var children = await _childService.GetChildrenByGender(gender);
+                return Ok(new { success = true, data = children });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPut("update-status/{id}")]
+        public async Task<IActionResult> UpdateChildStatus(int id, [FromBody] string status)
+        {
+            try
+            {
+                var updated = await _childService.UpdateChildStatus(id, status);
+                if (!updated)
+                    return NotFound(new { success = false, message = "Child not found." });
+
+                return Ok(new { success = true, message = "Child status updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet("by-age-range")]
+        public async Task<IActionResult> GetChildrenByAgeRange([FromQuery] int minAge, [FromQuery] int maxAge)
+        {
+            try
+            {
+                var children = await _childService.GetChildrenByAgeRange(minAge, maxAge);
+                return Ok(new { success = true, data = children });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet("by-blood-type/{bloodType}")]
+        public async Task<IActionResult> GetChildrenByBloodType(string bloodType)
+        {
+            try
+            {
+                var children = await _childService.GetChildrenByBloodType(bloodType);
+                return Ok(new { success = true, data = children });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
             }
         }
     }

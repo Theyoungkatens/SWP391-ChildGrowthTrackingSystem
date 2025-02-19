@@ -164,6 +164,105 @@ namespace SWP391.ChildGrowthTracking.Repository.Services
         {
             return await _context.Childs.CountAsync();
         }
+        // Kiểm tra xem user có phải là cha mẹ của đứa trẻ không
+        public async Task<bool> IsParent(int userId, int childId)
+        {
+            return await _context.Childs.AnyAsync(c => c.ChildId == childId && c.UserId == userId);
+        }
+
+        // Lấy danh sách trẻ em theo UserId
+        public async Task<List<ChildGetDTO>> GetChildrenByUserId(int userId)
+        {
+            return await _context.Childs
+                .Where(c => c.UserId == userId)
+                .Select(c => new ChildGetDTO
+                {
+                    ChildId = c.ChildId,
+                    UserId = c.UserId,
+                    Name = c.Name,
+                    DateOfBirth = c.DateOfBirth,
+                    Gender = c.Gender,
+                    BirthWeight = c.BirthWeight,
+                    BirthHeight = c.BirthHeight,
+                    BloodType = c.BloodType,
+                    Allergies = c.Allergies,
+                    Status = c.Status,
+                    Relationship = c.Relationship
+                }).ToListAsync();
+        }
+
+        // Lấy danh sách trẻ em theo giới tính
+        public async Task<List<ChildGetDTO>> GetChildrenByGender(string gender)
+        {
+            return await _context.Childs
+                .Where(c => c.Gender == gender)
+                .Select(c => new ChildGetDTO
+                {
+                    ChildId = c.ChildId,
+                    UserId = c.UserId,
+                    Name = c.Name,
+                    DateOfBirth = c.DateOfBirth,
+                    Gender = c.Gender,
+                    BirthWeight = c.BirthWeight,
+                    BirthHeight = c.BirthHeight,
+                    BloodType = c.BloodType,
+                    Allergies = c.Allergies,
+                    Status = c.Status,
+                    Relationship = c.Relationship
+                }).ToListAsync();
+        }
+        public async Task<bool> UpdateChildStatus(int childId, string status)
+        {
+            var child = await _context.Childs.FindAsync(childId);
+            if (child == null) return false;
+
+            child.Status = status;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        public async Task<List<ChildGetDTO>> GetChildrenByAgeRange(int minAge, int maxAge)
+        {
+            var today = DateTime.Today;
+            return await _context.Childs
+                .Where(c => c.DateOfBirth.HasValue &&
+           (today.Year - c.DateOfBirth.Value.Year) >= minAge &&
+           (today.Year - c.DateOfBirth.Value.Year) <= maxAge)
+
+                .Select(c => new ChildGetDTO
+                {
+                    ChildId = c.ChildId,
+                    UserId = c.UserId,
+                    Name = c.Name,
+                    DateOfBirth = c.DateOfBirth,
+                    Gender = c.Gender,
+                    BirthWeight = c.BirthWeight,
+                    BirthHeight = c.BirthHeight,
+                    BloodType = c.BloodType,
+                    Allergies = c.Allergies,
+                    Status = c.Status,
+                    Relationship = c.Relationship
+                }).ToListAsync();
+        }
+        public async Task<List<ChildGetDTO>> GetChildrenByBloodType(string bloodType)
+        {
+            return await _context.Childs
+                .Where(c => c.BloodType == bloodType)
+                .Select(c => new ChildGetDTO
+                {
+                    ChildId = c.ChildId,
+                    UserId = c.UserId,
+                    Name = c.Name,
+                    DateOfBirth = c.DateOfBirth,
+                    Gender = c.Gender,
+                    BirthWeight = c.BirthWeight,
+                    BirthHeight = c.BirthHeight,
+                    BloodType = c.BloodType,
+                    Allergies = c.Allergies,
+                    Status = c.Status,
+                    Relationship = c.Relationship
+                }).ToListAsync();
+        }
+
 
     }
 }

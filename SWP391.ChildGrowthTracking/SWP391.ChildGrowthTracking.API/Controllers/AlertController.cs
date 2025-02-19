@@ -35,12 +35,28 @@ namespace SWP391.ChildGrowthTracking.API.Controllers
         }
 
         // POST: api/Alert
+        // POST: api/Alert
         [HttpPost]
         public async Task<ActionResult<AlertGetDTO>> CreateAlert(CreateAlertDTO dto)
         {
+            // Kiểm tra các điều kiện hợp lệ
+            if (dto.ChildId == null || dto.ChildId <= 0)
+                return BadRequest("ChildId không hợp lệ.");
+
+            if (string.IsNullOrWhiteSpace(dto.AlertType))
+                return BadRequest("AlertType không được để trống.");
+
+            if (string.IsNullOrWhiteSpace(dto.Message))
+                return BadRequest("Message không được để trống.");
+
+            if (dto.AlertDate != null && dto.AlertDate > DateTime.UtcNow)
+                return BadRequest("AlertDate không thể là ngày trong tương lai.");
+
+            // Nếu dữ liệu hợp lệ, tiếp tục tạo Alert
             var newAlert = await _alertService.CreateAlert(dto);
             return CreatedAtAction(nameof(GetAlertById), new { id = newAlert.AlertId }, newAlert);
         }
+
 
         // PUT: api/Alert/{id}
         [HttpPut("{id}")]

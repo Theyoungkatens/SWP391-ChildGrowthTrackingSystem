@@ -13,5 +13,11 @@ namespace SWP391.ChildGrowthTracking.Repository
         Task<ChildGetDTO?> UpdateChild(int childId, UpdateChildDTO dto);
         Task<bool> DeleteChild(int childId);
         Task<int> GetChildCount();
+        Task<bool> IsParent(int userId, int childId);
+        Task<List<ChildGetDTO>> GetChildrenByUserId(int userId);
+        Task<List<ChildGetDTO>> GetChildrenByGender(string gender);
+        Task<bool> UpdateChildStatus(int childId, string status);
+        Task<List<ChildGetDTO>> GetChildrenByAgeRange(int minAge, int maxAge);
+        Task<List<ChildGetDTO>> GetChildrenByBloodType(string bloodType);
     }
 }
