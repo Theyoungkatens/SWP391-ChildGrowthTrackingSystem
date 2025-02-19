@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using SWP391.ChildGrowthTracking.Repository;
+using System;
+using System.Threading.Tasks;
 
 namespace SWP391.ChildGrowthTracking.API.Controllers
 {
@@ -8,36 +9,83 @@ namespace SWP391.ChildGrowthTracking.API.Controllers
     [ApiController]
     public class PaymentController : ControllerBase
     {
-        // GET: api/<PaymentController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        private readonly IPayment _paymentService;
+
+        public PaymentController(IPayment paymentService)
         {
-            return new string[] { "value1", "value2" };
+            _paymentService = paymentService;
         }
 
-        // GET api/<PaymentController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpPost("create")]
+        public async Task<IActionResult> CreatePayment(int membershipId)
         {
-            return "value";
+            try
+            {
+                var payment = await _paymentService.CreatePayment(membershipId);
+                if (payment == null)
+                {
+                    return BadRequest("Failed to create payment. Membership not found.");
+                }
+                return Ok(payment);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
-        // POST api/<PaymentController>
-        [HttpPost]
-        public void Post([FromBody] string value)
+        [HttpDelete("delete/{paymentId}")]
+        public async Task<IActionResult> DeletePayment(int paymentId)
         {
+            try
+            {
+                var result = await _paymentService.DeletePayment(paymentId);
+                if (!result)
+                {
+                    return NotFound("Payment not found.");
+                }
+                return Ok("Payment successfully deleted.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
-        // PUT api/<PaymentController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpGet("{membershipId}")]
+        public async Task<IActionResult> GetPayment(int membershipId)
         {
+            try
+            {
+                var payment = await _paymentService.GetPayment(membershipId);
+                if (payment == null)
+                {
+                    return NotFound("Payment not found.");
+                }
+                return Ok(payment);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
-        // DELETE api/<PaymentController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [HttpPut("update/{paymentId}")]
+        public async Task<IActionResult> UpdatePayment(int paymentId, string status)
         {
+            try
+            {
+                var payment = await _paymentService.UpdatePaymentStatus(paymentId, status);
+                if (payment == null)
+                {
+                    return NotFound("Payment not found or could not be updated.");
+                }
+                return Ok(payment);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
     }
 }

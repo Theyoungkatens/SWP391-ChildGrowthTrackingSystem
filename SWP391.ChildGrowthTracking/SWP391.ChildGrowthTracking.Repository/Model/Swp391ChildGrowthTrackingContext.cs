@@ -41,7 +41,7 @@ public partial class Swp391ChildGrowthTrackingContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server= MinhHung\\MINHHUNG;Uid=sa;Pwd=12345;Database= SWP391_ChildGrowthTracking;TrustServerCertificate=True");
+        => optionsBuilder.UseSqlServer("Data Source=SQL1002.site4now.net;Initial Catalog=db_ab2ea3_swp391;User Id=db_ab2ea3_swp391_admin;Password=sa123456;TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -40,6 +40,7 @@ builder.Services.AddScoped<IChild, ChildService>();
 builder.Services.AddScoped<IConsultationRequest, ConsultationRequestService>();
 builder.Services.AddScoped<IConsultationResponse, ConsultationResponseService>();
 builder.Services.AddScoped<IRatingFeedback, RatingFeedbackService>();
+builder.Services.AddScoped<IPayment, PaymentService>();
 // ?? JWT Authentication Configuration
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -91,11 +92,11 @@ builder.Services.AddSwaggerGen(option =>
 var app = builder.Build();
 
 // ?? Middleware Configuration
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+//}
 
 app.UseCors("MyCors");
 

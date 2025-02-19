@@ -5,6 +5,7 @@ namespace SWP391.ChildGrowthTracking.Repository.Model;
 
 public partial class UserMembership
 {
+   
     public int Membershipid { get; set; }
 
     public int? UserId { get; set; }
