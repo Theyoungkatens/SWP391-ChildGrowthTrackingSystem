@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using SWP391.ChildGrowthTracking.Repository;
+using SWP391.ChildGrowthTracking.Repository.DTO.AlertDTO;
+using SWP391.ChildGrowthTracking.Repository.Services;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SWP391.ChildGrowthTracking.API.Controllers
 {
@@ -8,36 +11,60 @@ namespace SWP391.ChildGrowthTracking.API.Controllers
     [ApiController]
     public class AlertController : ControllerBase
     {
-        // GET: api/<AlertController>
+        private readonly IAlert _alertService;
+
+        public AlertController(IAlert alertService)
+        {
+            _alertService = alertService;
+        }
+
+        // GET: api/Alert
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<ActionResult<List<AlertGetDTO>>> GetAllAlerts()
         {
-            return new string[] { "value1", "value2" };
+            return Ok(await _alertService.GetAllAlerts());
         }
 
-        // GET api/<AlertController>/5
+        // GET: api/Alert/{id}
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<ActionResult<AlertGetDTO>> GetAlertById(int id)
         {
-            return "value";
+            var alert = await _alertService.GetAlertById(id);
+            if (alert == null) return NotFound("Alert not found");
+            return Ok(alert);
         }
 
-        // POST api/<AlertController>
+        // POST: api/Alert
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<ActionResult<AlertGetDTO>> CreateAlert(CreateAlertDTO dto)
         {
+            var newAlert = await _alertService.CreateAlert(dto);
+            return CreatedAtAction(nameof(GetAlertById), new { id = newAlert.AlertId }, newAlert);
         }
 
-        // PUT api/<AlertController>/5
+        // PUT: api/Alert/{id}
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<ActionResult<AlertGetDTO>> UpdateAlert(int id, UpdateAlertDTO dto)
         {
+            var updatedAlert = await _alertService.UpdateAlert(id, dto);
+            if (updatedAlert == null) return NotFound("Alert not found");
+            return Ok(updatedAlert);
         }
 
-        // DELETE api/<AlertController>/5
+        // DELETE: api/Alert/{id}
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<ActionResult<bool>> DeleteAlert(int id)
         {
+            var result = await _alertService.DeleteAlert(id);
+            if (!result) return NotFound("Alert not found");
+            return Ok(true);
+        }
+
+        // GET: api/Alert/count
+        [HttpGet("count")]
+        public async Task<ActionResult<int>> CountAlerts()
+        {
+            return Ok(await _alertService.CountAlerts());
         }
     }
 }
