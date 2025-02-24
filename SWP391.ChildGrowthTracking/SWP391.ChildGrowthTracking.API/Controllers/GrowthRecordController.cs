@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using SWP391.ChildGrowthTracking.Repository;
+using SWP391.ChildGrowthTracking.Repository.DTO.GrowthRecordDTO;
+using SWP391.ChildGrowthTracking.Service;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SWP391.ChildGrowthTracking.API.Controllers
 {
@@ -8,36 +11,73 @@ namespace SWP391.ChildGrowthTracking.API.Controllers
     [ApiController]
     public class GrowthRecordController : ControllerBase
     {
-        // GET: api/<GrowthRecordController>
+        private readonly IGrowthRecord _growthRecordService;
+
+        public GrowthRecordController(IGrowthRecord growthRecordService)
+        {
+            _growthRecordService = growthRecordService;
+        }
+
+        // GET: api/GrowthRecord
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<ActionResult<IEnumerable<GrowthRecordDTO>>> GetAll()
         {
-            return new string[] { "value1", "value2" };
+            var records = await _growthRecordService.GetAll();
+            return Ok(records);
         }
 
-        // GET api/<GrowthRecordController>/5
+        // GET api/GrowthRecord/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<ActionResult<GrowthRecordDTO>> Get(int id)
         {
-            return "value";
+            var record = await _growthRecordService.GetById(id);
+            if (record == null)
+            {
+                return NotFound("Growth record not found.");
+            }
+            return Ok(record);
         }
 
-        // POST api/<GrowthRecordController>
-        [HttpPost]
-        public void Post([FromBody] string value)
+        // POST api/GrowthRecord
+        [HttpPost("{childId}")]
+        public async Task<ActionResult<GrowthRecordDTO>> Create(int childId, [FromBody] GrowthRecordDTO dto)
         {
+            if (dto == null)
+            {
+                return BadRequest("Invalid data.");
+            }
+
+            var createdRecord = await _growthRecordService.Create(childId, dto);
+            return CreatedAtAction(nameof(Get), new { id = createdRecord.RecordId }, createdRecord);
         }
 
-        // PUT api/<GrowthRecordController>/5
+        // PUT api/GrowthRecord/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<IActionResult> Update(int id, [FromBody] GrowthRecordDTO dto)
         {
+            if (dto == null)
+            {
+                return BadRequest("Invalid data.");
+            }
+
+            var updated = await _growthRecordService.Update(id, dto);
+            if (!updated)
+            {
+                return NotFound("Growth record not found.");
+            }
+            return NoContent();
         }
 
-        // DELETE api/<GrowthRecordController>/5
+        // DELETE api/GrowthRecord/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
+            var deleted = await _growthRecordService.Delete(id);
+            if (!deleted)
+            {
+                return NotFound("Growth record not found.");
+            }
+            return NoContent();
         }
     }
 }

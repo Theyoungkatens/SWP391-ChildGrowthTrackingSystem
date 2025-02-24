@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace SWP391.ChildGrowthTracking.Repository.Model;
 
@@ -38,10 +39,16 @@ public partial class Swp391ChildGrowthTrackingContext : DbContext
     public virtual DbSet<UserMembership> UserMemberships { get; set; }
 
     public virtual DbSet<Useraccount> Useraccounts { get; set; }
+    public DbSet<Dictionary<string, object>> Childrecord { get; set; }
+    public virtual DbSet<Child> Children { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=SQL1002.site4now.net;Initial Catalog=db_ab2ea3_swp391;User Id=db_ab2ea3_swp391_admin;Password=sa123456;TrustServerCertificate=True");
+    private String GetConnectionString()
+    {
+        IConfiguration configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", true, true).Build();
+        return configuration["ConnectionStrings:DefaultConnectionString"];
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseSqlServer(GetConnectionString());
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

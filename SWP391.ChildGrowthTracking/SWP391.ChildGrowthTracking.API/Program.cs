@@ -42,6 +42,7 @@ builder.Services.AddScoped<IConsultationResponse, ConsultationResponseService>()
 builder.Services.AddScoped<IRatingFeedback, RatingFeedbackService>();
 builder.Services.AddScoped<IPayment, PaymentService>();
 builder.Services.AddScoped<IAlert, AlertService>();
+builder.Services.AddScoped<IGrowthRecord, GrowthRecordService>();
 // ?? JWT Authentication Configuration
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

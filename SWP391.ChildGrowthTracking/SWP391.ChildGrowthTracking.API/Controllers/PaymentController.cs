@@ -71,11 +71,11 @@ namespace SWP391.ChildGrowthTracking.API.Controllers
         }
 
         [HttpPut("update/{paymentId}")]
-        public async Task<IActionResult> UpdatePayment(int paymentId, string status)
+        public async Task<IActionResult> UpdatePayment(int paymentId)
         {
             try
             {
-                var payment = await _paymentService.UpdatePaymentStatus(paymentId, status);
+                var payment = await _paymentService.UpdatePaymentStatus(paymentId);
                 if (payment == null)
                 {
                     return NotFound("Payment not found or could not be updated.");
@@ -87,5 +87,6 @@ namespace SWP391.ChildGrowthTracking.API.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
     }
 }

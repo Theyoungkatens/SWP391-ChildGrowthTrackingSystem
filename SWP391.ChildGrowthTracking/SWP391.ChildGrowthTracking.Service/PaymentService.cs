@@ -104,7 +104,7 @@ namespace SWP391.ChildGrowthTracking.Service
             }
         }
 
-        public async Task<PaymentDTO> UpdatePaymentStatus(int paymentId, string status)
+        public async Task<PaymentDTO> UpdatePaymentStatus(int paymentId)
         {
             try
             {
@@ -115,7 +115,8 @@ namespace SWP391.ChildGrowthTracking.Service
                     throw new Exception($"Payment with ID {paymentId} not found.");
                 }
 
-                payment.Status = status;
+                // Luôn cập nhật trạng thái thành "Completed"
+                payment.Status = "Completed";
                 _context.Payments.Update(payment);
                 await _context.SaveChangesAsync();
 
@@ -133,5 +134,7 @@ namespace SWP391.ChildGrowthTracking.Service
                 throw new Exception("Error updating payment status: " + ex.Message);
             }
         }
+
     }
 }
+

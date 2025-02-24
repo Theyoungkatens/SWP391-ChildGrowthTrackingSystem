@@ -126,7 +126,7 @@ namespace SWSWP391.ChildGrowthTracking.API.Controllers
                     string hashSecret = _configuration["Vnpay:HashSecret"];
                     string currCode = _configuration["Vnpay:CurrCode"];
                     string locale = _configuration["Vnpay:Locale"];
-                    string returnUrl = _configuration["Vnpay:UrlReturnAzure"]; // Hoặc UrlReturnAzure tùy thuộc vào môi trường
+                    string returnUrl = _configuration["Vnpay:UrlReturnLocal"]; // Hoặc UrlReturnAzure tùy thuộc vào môi trường
 
                     SVnpay pay = new SVnpay();
 
