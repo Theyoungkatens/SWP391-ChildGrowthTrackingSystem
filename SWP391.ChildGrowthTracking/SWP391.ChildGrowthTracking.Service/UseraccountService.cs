@@ -26,73 +26,31 @@ namespace SWP391.ChildGrowthTracking.Service
             _configuration = configuration;
         }
 
-        public async Task<List<Useraccount>> GetAllUsers(GetAllDTO request)
+        public async Task<List<GetAllUserDTO>> GetAllUsers()
         {
             try
             {
-                var query = context.Useraccounts.AsQueryable();
-
-                // Filtering
-                if (!string.IsNullOrWhiteSpace(request.FilterOn) && !string.IsNullOrWhiteSpace(request.FilterQuery))
-                {
-                    string filterQuery = request.FilterQuery.Trim().ToLower();
-
-                    query = request.FilterOn.ToLower() switch
+                return await context.Useraccounts
+                    .Select(u => new GetAllUserDTO
                     {
-                        "username" => query.Where(u => u.Username != null && u.Username.ToLower().Contains(filterQuery)),
-                        "email" => query.Where(u => u.Email != null && u.Email.ToLower().Contains(filterQuery)),
-                        "phonenumber" => query.Where(u => u.PhoneNumber != null && u.PhoneNumber.Contains(filterQuery)),
-                        "registrationdate" when DateTime.TryParse(filterQuery, out var regDate) =>
-                            query.Where(u => u.RegistrationDate.HasValue && u.RegistrationDate.Value.Date == regDate.Date),
-                        "lastlogin" when DateTime.TryParse(filterQuery, out var lastLogin) =>
-                            query.Where(u => u.LastLogin.HasValue && u.LastLogin.Value.Date == lastLogin.Date),
-                        "status" => query.Where(u => u.Status != null && u.Status.ToLower().Contains(filterQuery)),
-                        _ => query // Không lọc nếu điều kiện không hợp lệ
-                    };
-                }
-
-                // Sorting
-                if (!string.IsNullOrWhiteSpace(request.SortBy))
-                {
-                    bool isAscending = request.IsAscending ?? true;
-
-                    query = request.SortBy.ToLower() switch
-                    {
-                        "username" => isAscending
-                            ? query.OrderBy(u => u.Username ?? "")
-                            : query.OrderByDescending(u => u.Username ?? ""),
-                        "email" => isAscending
-                            ? query.OrderBy(u => u.Email ?? "")
-                            : query.OrderByDescending(u => u.Email ?? ""),
-                        "phonenumber" => isAscending
-                            ? query.OrderBy(u => u.PhoneNumber ?? "")
-                            : query.OrderByDescending(u => u.PhoneNumber ?? ""),
-                        "registrationdate" => isAscending
-                            ? query.OrderBy(u => u.RegistrationDate ?? DateTime.MinValue)
-                            : query.OrderByDescending(u => u.RegistrationDate ?? DateTime.MinValue),
-                        "lastlogin" => isAscending
-                            ? query.OrderBy(u => u.LastLogin ?? DateTime.MinValue)
-                            : query.OrderByDescending(u => u.LastLogin ?? DateTime.MinValue),
-                        "status" => isAscending
-                            ? query.OrderBy(u => u.Status ?? "")
-                            : query.OrderByDescending(u => u.Status ?? ""),
-                        _ => query.OrderBy(u => u.Username ?? "")
-                    };
-                }
-
-                // Paging
-                int pageNumber = request.PageNumber ?? 1;
-                int pageSize = request.PageSize ?? 10;
-                query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
-
-                return await query.ToListAsync();
+                        UserId = u.UserId,
+                        Username = u.Username,
+                        Email = u.Email,
+                        PhoneNumber = u.PhoneNumber,
+                        RegistrationDate = u.RegistrationDate,
+                        LastLogin = u.LastLogin,
+                        ProfilePicture = u.ProfilePicture,
+                        Address = u.Address,
+                        Status = u.Status,
+                        Role = (int)u.Role
+                    })
+                    .ToListAsync();
             }
             catch (Exception ex)
             {
                 throw new Exception($"Error retrieving users: {ex.Message}");
             }
         }
-
 
         public async Task<Useraccount> Authenticate(string username, string password)
         {
@@ -318,7 +276,32 @@ namespace SWP391.ChildGrowthTracking.Service
             }
         }
 
-
+        public async Task<List<GetAllUserDTO>> GetAllCustomers()
+        {
+            try
+            {
+                return await context.Useraccounts
+                    .Where(u => u.Role == 2) // Chỉ lấy user có Role = 2 (Patient)
+                    .Select(u => new GetAllUserDTO
+                    {
+                        UserId = u.UserId,
+                        Username = u.Username,
+                        Email = u.Email,
+                        PhoneNumber = u.PhoneNumber,
+                        RegistrationDate = u.RegistrationDate,
+                        LastLogin = u.LastLogin,
+                        ProfilePicture = u.ProfilePicture,
+                        Address = u.Address,
+                        Status = u.Status,
+                        Role = (int)u.Role
+                    })
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving patients: {ex.Message}");
+            }
+        }
 
 
 

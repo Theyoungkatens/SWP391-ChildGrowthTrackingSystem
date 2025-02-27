@@ -61,11 +61,11 @@ namespace SWP391.ChildGrowthTracking.API.Controllers
         }
 
         [HttpGet("get-all")]
-        public async Task<IActionResult> GetAllUsers([FromQuery] GetAllDTO request)
+        public async Task<IActionResult> GetAllUsers()
         {
             try
             {
-                var users = await _userAccountService.GetAllUsers(request);
+                var users = await _userAccountService.GetAllUsers();
                 return Ok(new { success = true, data = users });
             }
             catch (Exception ex)
@@ -220,7 +220,23 @@ namespace SWP391.ChildGrowthTracking.API.Controllers
                 return BadRequest(new { success = false, message = $"Error creating doctor: {ex.Message}" });
             }
         }
-
+        [HttpGet("GetAllCustomers")]
+        public async Task<IActionResult> GetAllCustomers()
+        {
+            try
+            {
+                var customers = await _userAccountService.GetAllCustomers();
+                if (customers == null || !customers.Any())
+                {
+                    return NotFound("No customers found.");
+                }
+                return Ok(customers);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
         public sealed record LoginRequest(string UserName, string Password);
     }
 }

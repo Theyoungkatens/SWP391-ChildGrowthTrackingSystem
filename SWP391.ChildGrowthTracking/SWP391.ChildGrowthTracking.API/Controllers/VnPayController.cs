@@ -194,51 +194,89 @@ namespace SWSWP391.ChildGrowthTracking.API.Controllers
             string returnUrl = _configuration["VnPay:ReturnPath"];
             float amount = 0;
             string status = "failed";
-            if (Request.Query.Count > 0)
+
+            try
             {
-                string vnp_HashSecret = _configuration["VnPay:HashSecret"];
-                var vnpayData = Request.Query;
-                SVnpay vnpay = new SVnpay();
-
-                foreach (string s in vnpayData.Keys)
+                if (Request.Query.Count > 0)
                 {
-                    if (!string.IsNullOrEmpty(s) && s.StartsWith("vnp_"))
+                    string vnp_HashSecret = _configuration["VnPay:HashSecret"];
+                    var vnpayData = Request.Query;
+                    SVnpay vnpay = new SVnpay();
+
+                    // Add VNPAY response data to the object
+                    foreach (string s in vnpayData.Keys)
                     {
-                        vnpay.AddResponseData(s, vnpayData[s]);
+                        if (!string.IsNullOrEmpty(s) && s.StartsWith("vnp_"))
+                        {
+                            vnpay.AddResponseData(s, vnpayData[s]);
+                        }
                     }
-                }
 
-                long orderId = Convert.ToInt64(vnpay.GetResponseData("vnp_TxnRef"));
-                float vnp_Amount = Convert.ToInt64(vnpay.GetResponseData("vnp_Amount")) / 100;
-                amount = vnp_Amount;
-                long vnpayTranId = Convert.ToInt64(vnpay.GetResponseData("vnp_TransactionNo"));
-                string vnp_ResponseCode = vnpay.GetResponseData("vnp_ResponseCode");
-                string vnp_TransactionStatus = vnpay.GetResponseData("vnp_TransactionStatus");
-                string vnp_SecureHash = Request.Query["vnp_SecureHash"];
-                bool checkSignature = vnpay.ValidateSignature(vnp_SecureHash, vnp_HashSecret);
+                    // Extract transaction details safely
+                    long orderId = 0;
+                    long vnpayTranId = 0;
+                    float vnp_Amount = 0;
 
-                if (checkSignature && vnp_ResponseCode == "00")
-                {
-                    status = "success";
+                    string orderIdStr = vnpay.GetResponseData("vnp_TxnRef");
+                    string amountStr = vnpay.GetResponseData("vnp_Amount");
+                    string transactionNoStr = vnpay.GetResponseData("vnp_TransactionNo");
+                    string vnp_ResponseCode = vnpay.GetResponseData("vnp_ResponseCode");
+                    string vnp_TransactionStatus = vnpay.GetResponseData("vnp_TransactionStatus");
+                    string vnp_SecureHash = Request.Query["vnp_SecureHash"];
 
-                    string transactionId = orderId.ToString();
-                    var payment = await this.context.Payments.Where(x => x.TransactionId.Equals(transactionId)).FirstOrDefaultAsync();
-
-                    if (payment != null)
+                    // Safely parse values
+                    if (!string.IsNullOrEmpty(orderIdStr) && long.TryParse(orderIdStr, out long parsedOrderId))
                     {
-                        // Cập nhật trạng thái thanh toán khi thành công
-                        payment.Status = "Completed";
-                        this.context.Payments.Update(payment);
-                        await this.context.SaveChangesAsync();
+                        orderId = parsedOrderId;
                     }
-                }
-                else
-                {
-                    status = "failed";
+
+                    if (!string.IsNullOrEmpty(amountStr) && long.TryParse(amountStr, out long parsedAmount))
+                    {
+                        vnp_Amount = parsedAmount / 100; // Convert amount to correct format
+                    }
+
+                    if (!string.IsNullOrEmpty(transactionNoStr) && long.TryParse(transactionNoStr, out long parsedTransactionNo))
+                    {
+                        vnpayTranId = parsedTransactionNo;
+                    }
+
+                    amount = vnp_Amount;
+
+                    // Validate signature
+                    bool checkSignature = vnpay.ValidateSignature(vnp_SecureHash, vnp_HashSecret);
+
+                    if (checkSignature && vnp_ResponseCode == "00")
+                    {
+                        status = "success";
+
+                        // Update payment status in the database
+                        string transactionId = orderId.ToString();
+                        var payment = await this.context.Payments
+                            .Where(x => x.TransactionId.Equals(transactionId))
+                            .FirstOrDefaultAsync();
+
+                        if (payment != null)
+                        {
+                            payment.Status = "Completed";
+                            this.context.Payments.Update(payment);
+                            await this.context.SaveChangesAsync();
+                        }
+                    }
+                    else
+                    {
+                        status = "failed";
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                // Log error for debugging
+                Console.WriteLine("Payment confirmation error: " + ex.Message);
+                status = "error";
+            }
 
-            return Redirect(returnUrl + "?amount=" + amount + "&status=" + status);
+            return Redirect($"{returnUrl}?amount={amount}&status={status}");
         }
+
     }
 }

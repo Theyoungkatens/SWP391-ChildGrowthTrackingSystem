@@ -118,6 +118,15 @@ namespace SWP391.ChildGrowthTracking.Service
                 // Luôn cập nhật trạng thái thành "Completed"
                 payment.Status = "Completed";
                 _context.Payments.Update(payment);
+
+                // Cập nhật trạng thái của UserMembership thành "Completed"
+                var membership = await _context.UserMemberships.FindAsync(payment.Membershipid);
+                if (membership != null)
+                {
+                    membership.SubscriptionStatus = "Completed";
+                    _context.UserMemberships.Update(membership);
+                }
+
                 await _context.SaveChangesAsync();
 
                 return new PaymentDTO
@@ -132,6 +141,20 @@ namespace SWP391.ChildGrowthTracking.Service
             catch (Exception ex)
             {
                 throw new Exception("Error updating payment status: " + ex.Message);
+            }
+        }
+
+        public async Task<decimal> GetTotalRevenue()
+        {
+            try
+            {
+                return (decimal)await _context.Payments
+                    .Where(p => p.Status == "Completed")
+                    .SumAsync(p => p.PaymentAmount);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error calculating total revenue: " + ex.Message);
             }
         }
 

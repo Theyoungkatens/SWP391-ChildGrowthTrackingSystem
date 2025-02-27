@@ -13,5 +13,6 @@ namespace SWP391.ChildGrowthTracking.Repository
         Task<bool> DeletePayment(int paymentId);
         Task<PaymentDTO> GetPayment(int membershipId);
         Task<PaymentDTO> UpdatePaymentStatus(int paymentId);
+        Task<decimal> GetTotalRevenue();
     }
 }

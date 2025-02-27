@@ -11,7 +11,7 @@ namespace SWP391.ChildGrowthTracking.Repository
 {
     public interface IUseraccount
     {
-        Task<List<Useraccount>> GetAllUsers(GetAllDTO request);
+        Task<List<GetAllUserDTO>> GetAllUsers();
         Task<Useraccount> Authenticate(string username, string password);
         Task<GetAllUserDTO> RegisterUser(RegisterDTO request);
         Task<GetAllUserDTO> UpdateUserAsync(int userId, UpdateUserDTO request);
@@ -19,6 +19,7 @@ namespace SWP391.ChildGrowthTracking.Repository
         Task<bool> BanUser(int userId);
         Task<bool> RemoveUser(int userId);
         Task<CreateUserDoctorDTO> CreateDoctorAsync(CreateUserDoctorDTO request);
+        Task<List<GetAllUserDTO>> GetAllCustomers();
 
     }
 }

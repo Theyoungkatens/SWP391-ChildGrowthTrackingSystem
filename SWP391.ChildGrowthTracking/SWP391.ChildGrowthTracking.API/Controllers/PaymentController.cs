@@ -87,6 +87,18 @@ namespace SWP391.ChildGrowthTracking.API.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-
+        [HttpGet("total-revenue")]
+        public async Task<IActionResult> GetTotalRevenue()
+        {
+            try
+            {
+                var totalRevenue = await _paymentService.GetTotalRevenue();
+                return Ok(new { TotalRevenue = totalRevenue });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }
